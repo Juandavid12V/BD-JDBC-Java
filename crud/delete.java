@@ -12,7 +12,7 @@ String dbUrl =
 
 String usuario = "postgres";
 
-String contrasena = "postgres";
+String contrasena = "123456789";
 
 //registrar la clase del driver, Cargar el controlador
 
@@ -26,7 +26,7 @@ Connection c= DriverManager.getConnection(dbUrl,usuario,contrasena);
 
 Statement s = c.createStatement ( ) ;
 
-String sql = "DELETE FROM gente WHERE (APELLIDO = 'perez' ) ";
+String sql = "DELETE FROM gente WHERE (APELLIDO = 'VEGA' ) ";
 
 s.executeUpdate(sql) ;
 

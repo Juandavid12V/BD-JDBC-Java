@@ -16,7 +16,7 @@ String dbUrl =
 
 String usuario = "postgres";
 
-String contrasena = "postgres";
+String contrasena = "123456789";
 
 //registrar la clase del driver, Cargar el controlador
 
@@ -30,7 +30,7 @@ Connection c= DriverManager.getConnection(dbUrl,usuario,contrasena);
 
 Statement s = c.createStatement ( ) ;
 
-String update = "update gente set NOMBRE = 'MARIA' WHERE APELLIDO = ‘PEREZ' " ;
+String update = "update gente set NOMBRE = 'DANIEL' WHERE APELLIDO = VEGA' " ;
 
 s.executeUpdate(update) ;
 
