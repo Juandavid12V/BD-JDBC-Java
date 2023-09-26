@@ -40,4 +40,4 @@ public class buscar{
         }
         s.close ( ) ; // También cierra el Resultset
     }
-} //Busca
+} //Buscar
