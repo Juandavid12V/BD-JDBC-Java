@@ -11,7 +11,7 @@ public class Clientes {
         Class.forName("org.postgresql.Driver");
         Connection c = DriverManager.getConnection(dbUrl, usuario, contrasena);
         Statement s = c.createStatement();
-        Scanner sc = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
 
         while (true) {
             System.out.println("1. Buscar Cliente por Nombre");
@@ -20,22 +20,20 @@ public class Clientes {
             System.out.println("4. Insertar Nuevo Cliente");
             System.out.println("5. Volver al Menú Principal");
 
-            int opcion = sc.nextInt();
-            sc.nextLine(); // Consume el newline
+            int opcion = scanner.nextInt();
+            scanner.nextLine(); // Consume el newline
 
             switch (opcion) {
                 case 1:
-                    System.out.println("Por favor ingrese el nombre del cliente:");
-                    String nombre = sc.nextLine();
-                    buscarClientePorNombre(s, nombre);
+                    buscarClientePorNombre(s);
                     break;
                 case 2:
                     System.out.println("Actualizar Cliente ");
-                    actualizarCliente(s);
+                    actualizarCliente(c, scanner);
                     break;
                 case 3:
                     System.out.println("Eliminar Cliente ");
-                    eliminarCliente(s);
+                    eliminarCliente(c, scanner);
                     break;
                 case 4:
                     System.out.println("Insertar Nuevo Cliente");
@@ -44,14 +42,18 @@ public class Clientes {
                 case 5:
                     return;
                 default:
-                    System.out.println("Opción no válida. Por favor, ingrese una opción válida.");
+                    System.out.println("Opcion no valida. Por favor, ingrese una opción valida.");
             }
         }
     }
 
     //BUSCAR
     // Código Clientes
-    static void buscarClientePorNombre(Statement s, String nombre) throws SQLException {
+    static void buscarClientePorNombre(Statement s) throws SQLException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Ingrese el nombre del cliente: ");
+        String nombre = scanner.nextLine();
+
         ResultSet r = s.executeQuery("SELECT NUM_CLIENTE, NOMBRE, DIRECCION, TELEFONO1, TELEFONO2, EMAIL, NACIONALIDAD " +
                 "FROM Clientes " +
                 "WHERE " +
@@ -60,7 +62,6 @@ public class Clientes {
                 "ORDER BY NUM_CLIENTE");
 
         while (r.next()) {
-            // El uso de mayúsculas no importa:
             System.out.println(r.getString("NOMBRE") + ", " +
                     r.getString("DIRECCION") +
                     ": " +
@@ -70,27 +71,80 @@ public class Clientes {
         }
     }
 
-    static void actualizarCliente(Statement s) throws SQLException {
-
-        //String borrarReservas = "DELETE FROM Reservas WHERE NUM_CLIENTE = 3" ;
-        //s.executeUpdate(borrarReservas);
+    static void actualizarCliente(Connection connection, Scanner scanner) throws SQLException {
+        Statement statement = connection.createStatement();
+        System.out.println("Ingrese el correo electrónico del cliente que desea actualizar: ");
+        String email = scanner.nextLine();
     
-        String update = "update Clientes set Nombre = 'David' WHERE DIRECCION = 'Cra 8 12 24' " ;
-        s.executeUpdate(update);
+        String seleccionar = "SELECT NUM_CLIENTE FROM Clientes WHERE EMAIL = '" + email + "'";
+        ResultSet s = statement.executeQuery(seleccionar); //consulta sql
     
+        if (s.next()) {
+            int numCliente = s.getInt("num_cliente"); //obtener el valor de una columna llamada "num_cliente" de la fila actual en el conjunto de resultados 
+    
+            System.out.println("Ingrese el nuevo nombre: ");
+            String nuevoNombre = scanner.nextLine();
+    
+            String updateQuery = "UPDATE Clientes SET Nombre = '" + nuevoNombre + "' WHERE NUM_CLIENTE = " + numCliente;
+            statement.executeUpdate(updateQuery);
+        } 
+        
+    
+        statement.close();
     }
+    
 
-    static void eliminarCliente(Statement s) throws SQLException {
-       // String borrarReservas = "DELETE FROM Reservas WHERE NUM_CLIENTE = 2" ;  //PARA BORRAR LA LLAVE FORANEA
-        //s.executeUpdate(borrarReservas);
-
-        String sql = "DELETE FROM Clientes WHERE (DIRECCION = 'Cra 5 12 21' ) ";
-        s.executeUpdate(sql) ;
+    static void eliminarCliente(Connection connection, Scanner scanner) throws SQLException {
+        Statement statement = connection.createStatement();
+        System.out.println("Ingrese el correo electrónico del cliente a eliminar: ");
+        String email = scanner.nextLine();
+    
+        String seleccionar = "SELECT NUM_CLIENTE FROM Clientes WHERE EMAIL = '" + email + "'";
+        ResultSet s = statement.executeQuery(seleccionar);
+    
+        if (s.next()) {
+            int numCliente = s.getInt("num_cliente");
+           
+            // Consulta la reserva
+            String seleccionar2 = "SELECT NUM_HABITACION FROM Reservas WHERE num_cliente = '" + numCliente + "'";
+            ResultSet s2 = statement.executeQuery(seleccionar2);
+    
+            if (s2.next()) {
+                int numHabitacion = s2.getInt("NUM_HABITACION");
+    
+                // Elimina la reserva
+                String eliminarReserva = "DELETE FROM Reservas WHERE NUM_HABITACION = " + numHabitacion;
+                statement.executeUpdate(eliminarReserva);
+            }
+    
+            // Elimina el cliente
+            String eliminarCliente = "DELETE FROM Clientes WHERE NUM_CLIENTE = " + numCliente;
+            statement.executeUpdate(eliminarCliente);
+        }
     }
 
     static void insertarCliente(Statement s) throws SQLException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Ingrese el nombre del nuevo cliente: ");
+        String nombre = scanner.nextLine();
+
+        System.out.println("Ingrese la dirección del nuevo cliente: ");
+        String direccion = scanner.nextLine();
+
+        System.out.println("Ingrese el teléfono 1 del nuevo cliente: ");
+        String telefono1 = scanner.nextLine();
+
+        System.out.println("Ingrese el teléfono 2 del nuevo cliente: ");
+        String telefono2 = scanner.nextLine();
+
+        System.out.println("Ingrese el correo electrónico del nuevo cliente: ");
+        String email = scanner.nextLine();
+
+        System.out.println("Ingrese la nacionalidad del nuevo cliente: ");
+        String nacionalidad = scanner.nextLine();
+
         String insert = "INSERT INTO Clientes (NOMBRE, DIRECCION, TELEFONO1, TELEFONO2, EMAIL, NACIONALIDAD) " +
-                       "VALUES ('santiago', 'cra 3 12 12', 3127761111, 3147915151, 'santiago@gmail.com', 'colombia')";
+                "VALUES ('" + nombre + "', '" + direccion + "', '" + telefono1 + "', '" + telefono2 + "', '" + email + "', '" + nacionalidad + "')";
         s.executeUpdate(insert);
     }
     

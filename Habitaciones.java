@@ -30,21 +30,21 @@ public class Habitaciones {
 
             switch (opcion) {
                 case 1:
-                    System.out.println("Por favor ingrese el tipo de habitación (Doble - Individual):");
+                    System.out.println("Por favor ingrese el tipo de habitación ");
                     String tipo = sc.nextLine();
                     buscarHabitacionesPorTipo(s, tipo);
                     break;
                 case 2:
                     System.out.println("Actualizar Numero Habitación ");
-                    actualizarHabitacion(s);
+                    actualizarHabitacion(c, sc);
                     break;
                 case 3:
                     System.out.println("Eliminar Habitación ");
-                    borrarHabitacion(s);
+                    eliminarHabitacion(c, sc);
                     break;
                 case 4:
                     System.out.println("Insertar Nueva Habitación");
-                    insertarHab(s);
+                    insertarHabitacion(s);
                     break;
                 case 5:
                     return; 
@@ -54,7 +54,7 @@ public class Habitaciones {
             }
         }
     
-        //BUSCAR
+  
         // Código Habitaciones
         static void buscarHabitacionesPorTipo(Statement s, String tipo) throws SQLException {
             ResultSet r = s.executeQuery("SELECT NUM_HABITACION, TIPO, PRECIO, CAMAS " +
@@ -76,30 +76,80 @@ public class Habitaciones {
             " " );
         }
              }
-         static void actualizarHabitacion(Statement s) throws SQLException {
-                String borrarReservas = "DELETE FROM Reservas WHERE NUM_HABITACION = 3" ;
-                s.executeUpdate(borrarReservas);
-            
-                String update = "update Habitaciones set TIPO = 'Grupal' WHERE PRECIO = '600000' " ;
-                s.executeUpdate(update);
+   
+        static void actualizarHabitacion(Connection connection, Scanner scanner) throws SQLException {
+            Statement statement = connection.createStatement();
+            System.out.println("Ingrese el número de habitación que desea actualizar: ");
+            int numHabitacion = scanner.nextInt();
+            scanner.nextLine(); 
+        
+            String seleccionar = "SELECT NUM_HABITACION FROM Habitaciones WHERE NUM_HABITACION = " + numHabitacion;
+            ResultSet resultSet = statement.executeQuery(seleccionar);
+        
+            if (resultSet.next()) {
+                System.out.println("Ingrese el nuevo tipo de habitación: ");
+                String nuevoTipo = scanner.nextLine();
+        
+                System.out.println("Ingrese el nuevo precio: ");
+                int nuevoPrecio = scanner.nextInt();
+        
+                System.out.println("Ingrese el nuevo numero de camas: ");
+                int nuevasCamas = scanner.nextInt();
+        
+                String updateQuery = "UPDATE Habitaciones SET TIPO = '" + nuevoTipo + "', PRECIO = '" + nuevoPrecio + "', CAMAS = '" + nuevasCamas
+                + "' WHERE NUM_HABITACION = " + numHabitacion;
+
+                statement.executeUpdate(updateQuery);
+
+            } else {
+                System.out.println("No se encontro una habitacion con el numero ingresado.");
             }
-            
-         static void borrarHabitacion(Statement s) throws SQLException {
-            String borrarReservas = "DELETE FROM Reservas WHERE NUM_HABITACION = 1" ;
-            s.executeUpdate(borrarReservas);
-
-            String sql = "DELETE FROM Habitaciones WHERE (PRECIO = '500000' ) ";
-            s.executeUpdate(sql) ;
-
+        
+            statement.close();
         }
-         static void insertarHab(Statement s) throws SQLException {
-             String insert = "INSERT INTO Habitaciones(TIPO, PRECIO, CAMAS)" +
-             "VALUES ('Doble' , 550000, 5) ";
-             s.executeUpdate(insert);
         
+        static void eliminarHabitacion(Connection connection, Scanner scanner) throws SQLException {
+            Statement statement = connection.createStatement();
+            System.out.println("Ingrese el numero de habitacion que desea eliminar: ");
+            int numHabitacion = scanner.nextInt();
+            scanner.nextLine(); 
+        
+            String seleccionar = "SELECT NUM_HABITACION FROM Habitaciones WHERE NUM_HABITACION = " + numHabitacion;
+            ResultSet resultSet = statement.executeQuery(seleccionar);
+        
+            if (resultSet.next()) {
+        
+                numHabitacion = resultSet.getInt("NUM_HABITACION");
+                String eliminarReserva = "DELETE FROM Reservas WHERE NUM_HABITACION = " + numHabitacion;
+                statement.executeUpdate(eliminarReserva);
+
+                String eliminarHabitacion = "DELETE FROM Habitaciones WHERE NUM_HABITACION = " + numHabitacion;
+                statement.executeUpdate(eliminarHabitacion);
+
+            } else {
+                System.out.println("No se encontró una habitacion con el número ingresado.");
+            }
+        
+            statement.close();
+        }
 
         
-        s.close ( ) ; // También cierra el Resultset
+        static void insertarHabitacion(Statement s) throws SQLException {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Ingrese el tipo de habitación: ");
+            String tipo = scanner.nextLine();
+        
+            System.out.println("Ingrese el precio: ");
+            double precio = scanner.nextDouble();
+        
+            System.out.println("Ingrese el número de camas: ");
+            int camas = scanner.nextInt();
+        
+            String insert = "INSERT INTO Habitaciones (TIPO, PRECIO, CAMAS) VALUES ('" + tipo + "', " + precio + ", " + camas + ")";
+            s.executeUpdate(insert);
+    
+        }
+    
     }
-} //Busca
+
 
